@@ -33,6 +33,9 @@ const UserSchema = new Schema(
       type: String,
       enum: ["google", "github", "local"],
     },
+    profilePic: {
+      type: String,
+    },
   },
   {
     timestamps: true,
@@ -50,6 +53,35 @@ UserSchema.pre("save", async () => {
   }
   next();
 });
+
+UserSchema.methods.comparePassword = async function (candidatePassword) {
+  try {
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch (error) {
+    throw error;
+  }
+};
+UserSchema.methods.getProfile = function () {
+  return {
+    id: this._id,
+    username: this.username,
+    email: this.email,
+    name: this.name,
+    gender: this.gender,
+    profilePic: this.profilePic,
+    createdAt: this.createdAt,
+  };
+};
+UserSchema.methods.generateToken = function () {
+  try {
+    const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: "365d",
+    });
+    return token;
+  } catch (err) {
+    return err;
+  }
+};
 
 const User = mongoose.model("User", UserSchema);
 export default User;
