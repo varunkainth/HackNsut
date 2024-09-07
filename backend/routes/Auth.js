@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { Github, Google, login, Register } from "../controllers/AuthController";
+import { Github, Google, login, Register } from "../controllers/AuthController.js";
 const router = Router();
 
 router.post("/register", Register);
