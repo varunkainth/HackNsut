@@ -24,6 +24,10 @@ app.get("/", (req, res) => {
   res.send("Server is Running....");
 });
 
+import AuthRoutes from "./routes/Auth.js";
+
+app.use("/api/auth", AuthRoutes);
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send("Something broke!");
