@@ -121,3 +121,54 @@ export const Google = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
+export const Github = async (req, res) => {
+    try {
+      const { id } = req.body;
+      const decodedToken = await admin.auth().verifyIdToken(id);
+      const { uid, name, email, picture } = decodedToken;
+      const user = await User.findOne({ $or: [{ email }, { uid }] });
+  
+      if (user) {
+        const token = await user.generateToken();
+        res.cookie("token", token, {
+          httpOnly: true,
+          maxAge: 365 * 30 * 24 * 60 * 60 * 1000,
+          sameSite: "strict",
+          secure: process.env.NODE_ENV === "production", // Secure flag based on environment
+        });
+        res.header("Authorization", `Bearer ${token}`);
+        res.json({
+          message: "Github Login successful.",
+          token,
+          user: user.getProfile(),
+        });
+      }
+      const token = user.generateToken();
+  
+      const newUser = new User({
+        name,
+        email,
+        uid,
+        profilePic: picture,
+        provider: "github",
+        password: token,
+      });
+      await newUser.save();
+      res.cookie("token", token, {
+        httpOnly: true,
+        maxAge: 365 * 30 * 24 * 60 * 60 * 1000,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production", // Secure flag based on environment
+      });
+      res.header("Authorization", `Bearer ${token}`);
+      res.json({
+        message: "Github Login successful.",
+        token,
+        user: newUser.getProfile(),
+      });
+    } catch (err) {
+      console.error("Github Auth Controller Error", err);
+      return res.status(500).json({ message: err.message });
+    }
+  };
+  
