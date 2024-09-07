@@ -2,9 +2,9 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
-  "type":"commonjs",
+  "type":"module",
   "scripts": {
-    "dev":"nodemon src/index.js"
+    "dev":"nodemon index.js"
   },
   "author": "",
   "license": "ISC",
